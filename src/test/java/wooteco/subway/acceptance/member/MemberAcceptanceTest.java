@@ -33,7 +33,8 @@ public class MemberAcceptanceTest extends AcceptanceTest {
 	void manageMember() {
 		String location = createMember(TEST_USER_EMAIL, TEST_USER_NAME,
 			TEST_USER_PASSWORD);
-		assertThat(location).isNotBlank();
+
+		assertThat(location).matches("^/members/[1-9][0-9]*$");
 
 		TokenResponse tokenResponse = login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 		assertThat(tokenResponse.getAccessToken()).isNotNull();
