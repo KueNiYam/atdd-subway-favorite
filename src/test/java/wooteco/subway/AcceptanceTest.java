@@ -19,6 +19,7 @@ import wooteco.subway.service.line.dto.LineDetailResponse;
 import wooteco.subway.service.line.dto.LineResponse;
 import wooteco.subway.service.line.dto.WholeSubwayResponse;
 import wooteco.subway.service.member.dto.MemberResponse;
+import wooteco.subway.service.member.dto.TokenResponse;
 import wooteco.subway.service.path.dto.PathResponse;
 import wooteco.subway.service.station.dto.StationResponse;
 
@@ -276,7 +277,12 @@ public class AcceptanceTest {
 				extract().header("Location");
 	}
 
+	public TokenResponse login(String testUserEmail, String testUserPassword) {
+		return null;
+	}
+
 	public MemberResponse getMember(String email) {
+		// TODO 인증된 회원 자신의 정보만 불러오도록 수정
 		return
 			given().
 				accept(MediaType.APPLICATION_JSON_VALUE).
@@ -289,6 +295,7 @@ public class AcceptanceTest {
 	}
 
 	public void updateMember(MemberResponse memberResponse) {
+		// TODO 인증된 회원 자신의 정보만 수정하도록 수정
 		Map<String, String> params = new HashMap<>();
 		params.put("name", "NEW_" + TEST_USER_NAME);
 		params.put("password", "NEW_" + TEST_USER_PASSWORD);
@@ -305,6 +312,8 @@ public class AcceptanceTest {
 	}
 
 	public void deleteMember(MemberResponse memberResponse) {
+		// 인증된 회원 자신의 정보만 삭제하도록 수정
+
 		given().when().
 			delete("/members/" + memberResponse.getId()).
 			then().
