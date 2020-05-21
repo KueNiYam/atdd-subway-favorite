@@ -33,20 +33,19 @@ public class MemberAcceptanceTest extends AcceptanceTest {
 	void manageMember() {
 		String location = createMember(TEST_USER_EMAIL, TEST_USER_NAME,
 			TEST_USER_PASSWORD);
-
 		assertThat(location).matches("^/members/[1-9][0-9]*$");
 
 		TokenResponse tokenResponse = login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 		assertThat(tokenResponse.getAccessToken()).isNotNull();
 		assertThat(tokenResponse.getTokenType()).isEqualTo("bearer");
 
-		MemberResponse memberResponse = getMember(TEST_USER_EMAIL);
+		MemberResponse memberResponse = getMember(TEST_USER_EMAIL, tokenResponse);
 		assertThat(memberResponse.getId()).isNotNull();
 		assertThat(memberResponse.getEmail()).isEqualTo(TEST_USER_EMAIL);
 		assertThat(memberResponse.getName()).isEqualTo(TEST_USER_NAME);
 
-		updateMember(memberResponse);
-		MemberResponse updatedMember = getMember(TEST_USER_EMAIL);
+		updateMember(memberResponse, tokenResponse);
+		MemberResponse updatedMember = getMember(TEST_USER_EMAIL, tokenResponse);
 		assertThat(updatedMember.getName()).isEqualTo("NEW_" + TEST_USER_NAME);
 
 		deleteMember(memberResponse);

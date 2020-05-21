@@ -1,13 +1,20 @@
 package wooteco.subway;
 
-import io.restassured.RestAssured;
-import io.restassured.specification.RequestSpecification;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
+
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
 import wooteco.subway.service.line.dto.LineDetailResponse;
 import wooteco.subway.service.line.dto.LineResponse;
 import wooteco.subway.service.line.dto.WholeSubwayResponse;
@@ -15,12 +22,6 @@ import wooteco.subway.service.member.dto.MemberResponse;
 import wooteco.subway.service.member.dto.TokenResponse;
 import wooteco.subway.service.path.dto.PathResponse;
 import wooteco.subway.service.station.dto.StationResponse;
-
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql("/truncate.sql")
@@ -294,29 +295,31 @@ public class AcceptanceTest {
                         extract().as(TokenResponse.class);
     }
 
-    public MemberResponse getMember(String email) {
-        // TODO 인증된 회원 자신의 정보만 불러오도록 수정
-        return
-                given().
-                        accept(MediaType.APPLICATION_JSON_VALUE).
-                        when().
-                        get("/members?email=" + email).
-                        then().
-                        log().all().
-                        statusCode(HttpStatus.OK.value()).
+	public MemberResponse getMember(String email, TokenResponse tokenResponse) {
+		return
+			given().
+				auth().
+				oauth2(tokenResponse.getAccessToken()).
+				accept(MediaType.APPLICATION_JSON_VALUE).
+				when().
+				get("/members?email=" + email).
+				then().
+				log().all().
+				statusCode(HttpStatus.OK.value()).
                         extract().as(MemberResponse.class);
     }
 
-    public void updateMember(MemberResponse memberResponse) {
-        // TODO 인증된 회원 자신의 정보만 수정하도록 수정
-        Map<String, String> params = new HashMap<>();
-        params.put("name", "NEW_" + TEST_USER_NAME);
-        params.put("password", "NEW_" + TEST_USER_PASSWORD);
+	public void updateMember(MemberResponse memberResponse, TokenResponse tokenResponse) {
+		Map<String, String> params = new HashMap<>();
+		params.put("name", "NEW_" + TEST_USER_NAME);
+		params.put("password", "NEW_" + TEST_USER_PASSWORD);
 
-        given().
-                body(params).
-                contentType(MediaType.APPLICATION_JSON_VALUE).
-                accept(MediaType.APPLICATION_JSON_VALUE).
+		given().
+			auth().
+			oauth2(tokenResponse.getAccessToken()).
+			body(params).
+			contentType(MediaType.APPLICATION_JSON_VALUE).
+			accept(MediaType.APPLICATION_JSON_VALUE).
                 when().
                 put("/members/" + memberResponse.getId()).
                 then().
